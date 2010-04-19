@@ -1,11 +1,12 @@
 == About
 
-This is a question writing wizard that is used to make questions easier to write in the IMathAS system.
+This is a question writing wizard that is used to make questions easier to write in the IMathAS system.  The files manageqset.php and questionwizard.php are modified from the original source of IMathAS written by David Lippman.
 
 == Dependencies
   * IMathAS 1.8 is installed properly
 
 == Installation
+  * Copy all the files into the <IMathAS-root>/course/ overwriting manageqset.php
 
 == More Information
 
