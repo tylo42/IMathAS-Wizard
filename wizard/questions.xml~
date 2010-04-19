@@ -1,0 +1,50 @@
+<wizard>
+   <question type="Number">
+   
+      <required-variable type="text-input">
+         <title>Answer</title>
+      </required-variable>
+
+      <optional-variable type="text-input">
+         <title>Relative Tolerance</title>
+         <default>.001</default>
+      </optional-variable>
+
+      <optional-variable type="text-input">
+         <title>Absolute Tolerance</title>
+      </optional-variable>
+
+      <optional-variable type="text-input">
+         <title>Required Tolerance</title>
+      </optional-variable>
+
+      <optional-variable type="radio-selection">
+         <title>Answer Format</title>
+         <selections default="default">
+            <selection name="default">Default</selection>
+            <selection name="list">List</selection>
+            <selection name="exactlist">Exact List</selection>
+            <selection name="orderedlist">Ordered List</selection>
+         </selections>
+      </optional-variable>
+
+      <optional-variable type="text-input">
+         <title>Answer Prompt</title>
+      </optional-variable>
+
+      <optional-variable type="radio-selection">
+         <title>Display Format</title>
+         <selections default="number">
+            <selection name="number">Number</selection>
+            <selection name="point">Point</selection>
+            <selection name="vector">Vector</selection>
+         </selections>
+      </optional-variable>
+
+      <optional-variable type="text-input">
+         <title>Answer Box Size</title>
+         <default>20</default>
+      </optional-variable>
+
+   </question>
+</wizard>
