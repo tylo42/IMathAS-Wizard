@@ -46,7 +46,7 @@ class question_set_factory {
    
 		foreach($xml->question as $xml_question) {
 			// set up the question
-			$question = new Question($xml_question['qtype']);
+			$question = new Question($xml_question['qtype']->getName());
 			print "Title:".$xml_question['qtype'];
 			//print 
 			
