@@ -7,12 +7,12 @@
 require_once("variable.php");
 
 class Question {	
-	protected $pre;
-	protected $myq;
-	protected $qtype;
-	protected $control_lines;
-	protected $required_variables;
-	protected $optional_variables;
+	private $pre;
+	private $myq;
+	private $qtype;
+	private $control_lines;
+	private $required_variables;
+	private $optional_variables;
 
 	function __construct($qtype) {
 		$this->pre=$qtype."_";
@@ -23,6 +23,10 @@ class Question {
 		$this->optional_variables=array();
 		$this->no_display_variables=array();
 	}
+   
+   public function get_pre() { return $this->pre; }
+   public function get_myq() { return $this->myq; }
+   public function get_qtype() { return $this->qtype; }
    
 	public function add_variable($variable) {
 		if($variable->required()==true) {
