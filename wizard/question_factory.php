@@ -13,11 +13,14 @@ require_once("question.php");
 
 
 
-$xml = simplexml_load_file("questions.xml");
+//$xml = simplexml_load_file("questions.xml");
+
+$xml = new DOMDocument();
+$xml->load("questions.xml"); //make sure path is correct 
 
 $factory = new question_set_factory;
 
-$questions = $factory->create($xml);
+$question_set = $factory->create($xml);
 
 
 ////////////////////////////////////////////////////////
@@ -33,6 +36,10 @@ class question_set {
 		assert(!isset($questions[$question->get_qtype()]));
 		$questions[$question->get_qtype()] = $question;
 	}
+	
+	function get($qtype) {
+		return $questions[$qtype];
+	}
 }
 
 
@@ -44,25 +51,30 @@ class question_set_factory {
 	public function create($xml) {
 		$questions = new question_set;
    
-		foreach($xml->question as $xml_question) {
+		foreach($xml->getElementsByTagName("question") as $xml_question) {
 			// set up the question
-			$question = new Question($xml_question['qtype']->getName());
-			print "Title:".$xml_question['qtype'];
-			//print 
+			$question = new Question($xml_question->getAttribute("qtype"));
 			
-			// set up the required variables
-			foreach($xml_question->variable as $variable) {
-				switch($variable['type']) {
+			foreach($xml_question->getElementsByTagName("variable") as $xml_variable) {
+				$type = $xml_variable->getAttribute("type");
+				$vairable = NULL;
+				switch($type) {
 					case "text":
-						$question->insert($this->create_text($variable));
+						$variable = $this->create_text($xml_variable);
 						break;
 					case "radio":
-						//$question->insert(create_radio($variable));
+						$variable = $this->create_radio($xml_variable);
 						break;
 					default:
-						assert("Unknown variable type '".$variable['type']."'");
+						assert("Unknown variable type '".$type."'");
 						break;
 				} // end switch
+				assert($variable != NULL);
+				if($xml_variable->getAttribute("required") == true) {
+					$question->insert_required($variable);
+				} else {
+					$question->insert_optional($variable);
+				}
 			} // end foreach variable
 			$questions->insert($question);
 		} // end foreach question
@@ -70,8 +82,14 @@ class question_set_factory {
 	}
 	
 	private function create_text($variable) {
-		print "Title: ".$variable->title."<br />";
-		return new text_input($variable->title,"instructions","name","pre","default_value","required","ignore_quotes");
+		$title = $variable->getElementsByTagName("title")->item(0)->nodeValue;
+		$instructions = $variable->getElementsByTagName("instructions")->item(0)->nodeValue;  // Note: this may be moved out of the XML
+		
+		return new text_input($title, $instructions, $name, $pre, $default_value, $required, $ignore_quotes);
+	}
+	
+	private function create_radio($variable) {
+		return new radio_selection_input($title, $instructions, $name, $pre, $default_value, $required, $values);
 	}
 }
 

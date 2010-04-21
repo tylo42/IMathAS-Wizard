@@ -114,17 +114,17 @@ class Question {
 		return $match[1];
 	}
 
-   public function insert($variable) {
-      if($variable->get_required()) {
-         $this->required_variables[$variable->get_name()] = $variable;
-      } else {
-         $this->optional_variables[$variable->get_name()] = $variable;
-      }
-   }
+	public function insert_required($variable) {
+		$this->required_variables[$variable->get_name()] = $variable;
+	}
+   
+	public function insert_optional($variable) {
+		$this->optional_variables[$variable->get_name()] = $variable;
+	}
 
 	// These functions will be replaced by the questions_factory.php and questions.xml
 	public function create_text_input($required, $title, $instructions, $name, $default_value, $ignore_quotes) {
-		$variable=new text_input($title, $instructions, $name, $this->pre, $default_value, $required, $ignore_quotes);
+		$variable=new text_input($title, $instructions, $name, $this->pre, $default_value, $ignore_quotes);
 		if($required) {
 			$this->required_variables[$name]=$variable;
 		} else {
@@ -133,7 +133,7 @@ class Question {
 	}
 
 	public function create_radio_selection_input($required,$title,$instructions,$name,$default_value,$values) {
-		$variable=new radio_selection_input($title, $instructions, $name, $this->pre, $default_value, $required, $values);
+		$variable=new radio_selection_input($title, $instructions, $name, $this->pre, $default_value, $values);
 		if($required) {
 			$this->required_variables[$name]=$variable;
 		} else {
@@ -142,7 +142,7 @@ class Question {
 	}
 
 	public function create_menu_selection_input($required,$title,$instructions,$name,$default_value,$values) {
-		$variable=new menu_selection_input($title, $instructions, $name, $this->pre, $default_value, $required, $values);
+		$variable=new menu_selection_input($title, $instructions, $name, $this->pre, $default_value, $values);
 		if($required) {
 			$this->required_variables[$name]=$variable;
 		} else {
@@ -151,7 +151,7 @@ class Question {
 	}
 
 	public function create_check_selection_input($required,$title,$instructions,$name,$default_value,$values) {
-		$variable=new check_selection_input($title,$instructions,$name,$this->pre,$default_value, $required,$values);
+		$variable=new check_selection_input($title,$instructions,$name,$this->pre,$default_value,$values);
 		if($required) {
 			$this->required_variables[$name]=$variable;
 		} else {
@@ -160,7 +160,7 @@ class Question {
 	}
 
 	public function create_multiple_text_input($required,$title,$instructions,$name,$default_value,$values) {
-		$variable=new multiple_text_input($title, $instructions, $name, $this->pre, $default_value, $required, $values);
+		$variable=new multiple_text_input($title, $instructions, $name, $this->pre, $default_value, $values);
 		if($required) {
 			$this->required_variables[$name]=$variable;
 		} else {
@@ -169,7 +169,7 @@ class Question {
 	}
 
 	public function create_required_times_input($required){
-		$variable=new required_times_input($this->pre, $required);
+		$variable=new required_times_input($this->pre);
 		if($required) {
 			$this->required_variables["requiretimes"]=$variable;
 		} else {
@@ -178,7 +178,7 @@ class Question {
 	}
 
 	public function create_draw_background_input($required) {
-		$variable=new draw_background_input($this->pre, $required);
+		$variable=new draw_background_input($this->pre);
 		if($required) {
 			$this->required_variables["background"]=$variable;
 		} else {
@@ -187,7 +187,7 @@ class Question {
 	}
 
 	public function create_string_flags_input($required) {
-		$variable=new string_flags_input($this->pre, $required);
+		$variable=new string_flags_input($this->pre);
 		if($required) {
 			$this->required_variables["strflags"]=$variable;
 		} else {
@@ -196,7 +196,7 @@ class Question {
 	}
 
 	public function create_numfunc_variables_domain_input($required) {
-		$variable=new numfunc_variables_domain_input($this->pre, $required);
+		$variable=new numfunc_variables_domain_input($this->pre);
 		if($required) {
 			$this->required_variables["variables"]=$variable;
 			$this->no_display_variables["domain"]= & $this->required_variables["variables"];
@@ -207,7 +207,7 @@ class Question {
 	}
 
 	public function create_draw_answer_input($required) {
-		$variable=new draw_answer_input($this->pre, $required);
+		$variable=new draw_answer_input($this->pre);
 		if($required) {
 			$this->required_variables["answers"]=$variable;
 			$this->no_display_variables["partweights"]= & $this->required_variables["answers"];
@@ -218,7 +218,7 @@ class Question {
 	}
 
 	public function create_matrix_answer($required,$title,$instructions,$name,$default_value) {
-		$variable=new matrix_answer($title,$instructions,$name,$this->pre,$default_value, $required);
+		$variable=new matrix_answer($title,$instructions,$name,$this->pre,$default_value);
 		if($required) {
 			$this->required_variables[$name]=$variable;
 			$this->no_display_variables['answersize']= & $this->required_variables[$name];
@@ -229,7 +229,7 @@ class Question {
 	}
 
 	public function create_choices_answer($required) {
-		$variable=new choices_answer($this->pre, $required);
+		$variable=new choices_answer($this->pre);
 		if($required) {
 			$this->required_variables['questions']=$variable;
 			$this->no_display_variables['choices']= & $this->required_variables['questions'];
@@ -242,7 +242,7 @@ class Question {
 	}
 	
 	public function create_multans_answer($required) {
-		$variable=new multans_answer($this->pre, $required);
+		$variable=new multans_answer($this->pre);
 		if($required) {
 			$this->required_variables['questions']=$variable;
 			$this->no_display_variables['choices']= & $this->required_variables['questions'];
@@ -255,7 +255,7 @@ class Question {
 	}
 	
 	public function create_matching_answer($required) {
-		$variable=new matching_answer($this->pre, $required);
+		$variable=new matching_answer($this->pre);
 		if($required) {
 			$this->required_variables['questions']=$variable;
 			$this->no_display_variables['choices']= & $this->required_variables['questions'];

@@ -26,16 +26,14 @@ abstract class Variable {
 	protected $default_value;
 	protected $instructions;
 	protected $id; // TO BE REMOVED
-	private $required; // boolean value, true if it is a required variable, else false
 
-	public function __construct($title, $instructions, $name, $pre, $default_value, $required) {
+	public function __construct($title, $instructions, $name, $pre, $default_value) {
 		$this->title=$title;
 		$this->instructions=$instructions;
 		$this->name=$name;
 		$this->pre=$pre;
 		$this->default_value=$default_value;
 		$this->id=$pre.$name;
-		$this->required=$required;
 	}
 	
 	public function get_title() { return $this->title; }
@@ -45,7 +43,6 @@ abstract class Variable {
 	public function get_default_value() { return $this->default_value; }
 	public function get_instructions() { return $this->instructions; }
 	public function get_id() { return $this->pre.$this->name; }
-	public function get_required() { return $this->required; }
 
    /** Display Function: used to print [+][-], grayed out if not my question
     * 
@@ -210,8 +207,8 @@ abstract class Variable {
 class text_input extends Variable{
 	private $ignore_quotes;
 
-	function __construct($title,$instructions,$name,$pre,$default_value,$required,$ignore_quotes) {
-		parent::__construct($title,$instructions,$name,$pre,$default_value,$required);
+	function __construct($title, $instructions, $name, $pre, $default_value, $ignore_quotes) {
+		parent::__construct($title,$instructions,$name,$pre,$default_value);
 		$this->ignore_quotes=$ignore_quotes;
 	}	
 
@@ -239,8 +236,8 @@ class text_input extends Variable{
 class radio_selection_input extends Variable{
 	private $values;
 
-	function __construct($title, $instructions, $name, $pre, $default_value, $required, $values){
-		parent::__construct($title, $instructions, $name, $pre, $default_value, $required);
+	function __construct($title, $instructions, $name, $pre, $default_value, $values){
+		parent::__construct($title, $instructions, $name, $pre, $default_value);
 		$this->values=$values;
 	}
 
@@ -267,8 +264,8 @@ class radio_selection_input extends Variable{
 class check_selection_input extends Variable{
 	private $values;
 
-	function __construct($title, $instructions, $name, $pre, $default_value, $required, $values){
-		parent::__construct($title, $instructions, $name, $pre, $default_value, $required);
+	function __construct($title, $instructions, $name, $pre, $default_value, $values){
+		parent::__construct($title, $instructions, $name, $pre, $default_value);
 		$this->values=$values;
 	}
 
@@ -331,8 +328,8 @@ class check_selection_input extends Variable{
 class menu_selection_input extends Variable {
 	private $values;
 
-	function __construct($title, $instructions, $name, $pre, $default_value, $required, $values) {
-		parent::__construct($title, $instructions, $name, $pre, $default_value, $required);
+	function __construct($title, $instructions, $name, $pre, $default_value, $values) {
+		parent::__construct($title, $instructions, $name, $pre, $default_value);
 		$this->values=$values;
 	}
 
@@ -361,8 +358,8 @@ class menu_selection_input extends Variable {
 // Classes below here are a little less generic.
 // It would be nice to try to make them a little more generic.
 class multiple_answers_questions extends Variable{
-	function __construct($title, $instructions, $name, $pre, $default_value, $required){
-		parent::__construct($title, $instructions, $name, $pre, $default_value, $required);
+	function __construct($title, $instructions, $name, $pre, $default_value){
+		parent::__construct($title, $instructions, $name, $pre, $default_value);
 	}
 	
 	public function display_variable($myq, &$line) {
@@ -382,8 +379,8 @@ class multiple_answers_questions extends Variable{
 }
 
 class choices_answer extends Variable{
-	function __construct($pre, $required) {
-		parent::__construct("Choices", "", "choices", $pre, "", $required);
+	function __construct($pre) {
+		parent::__construct("Choices", "", "choices", $pre, "");
 	}
 	
 	public function display_variable($myq, &$line){
@@ -451,8 +448,8 @@ class choices_answer extends Variable{
 }
 
 class multans_answer extends Variable{
-	function __construct($pre, $required) {
-		parent::__construct("Choices","","choices",$pre,"", $required);
+	function __construct($pre) {
+		parent::__construct("Choices","","choices",$pre,"");
 	}
 	
 	public function display_variable($myq,&$line) {
@@ -536,8 +533,8 @@ class matching_answer extends Variable{ // works
 	private $answers;
 	private $correct;
 
-	function __construct($pre, $required) {
-		parent::__construct("Choices", "", "choices", $pre, "", $required);
+	function __construct($pre) {
+		parent::__construct("Choices", "", "choices", $pre, "");
 		$this->questions=$pre."questions";
 		$this->answers=$pre."answers";
 		$this->correct=$pre."correct";
@@ -677,8 +674,8 @@ class matching_answer extends Variable{ // works
 }
 
 class matrix_answer extends Variable {  // works 
-	function __construct($title, $instructions, $name, $pre, $default_value, $required){
-		parent::__construct($title, $instructions, $name, $pre, $default_value, $required);
+	function __construct($title, $instructions, $name, $pre, $default_value){
+		parent::__construct($title, $instructions, $name, $pre, $default_value);
 	}
 
 	public function display_variable($myq,&$line){
@@ -798,8 +795,8 @@ class draw_answer_input extends Variable { // works, could use some modification
 	protected $function;
 	protected $type;
 
-	function __construct($pre, $required) {
-		parent::__construct("Answers", "", "answers", $pre, "", $required);
+	function __construct($pre) {
+		parent::__construct("Answers", "", "answers", $pre, "");
 		$this->function=$pre."function";
 		$this->type=$pre."type";
 	}
@@ -931,8 +928,8 @@ class draw_answer_input extends Variable { // works, could use some modification
 class numfunc_variables_domain_input extends Variable {
 	private $domain;
 
-	function __construct($pre, $required) {
-		parent::__construct("Variables", "", "variables", $pre, "", $required);
+	function __construct($pre) {
+		parent::__construct("Variables", "", "variables", $pre, "");
 		$this->domain_min=$pre."domain_min";
 		$this->domain_max=$pre."domain_max";
 		$this->integers=$pre."integers";
@@ -1035,8 +1032,8 @@ class numfunc_variables_domain_input extends Variable {
 class multiple_text_input extends Variable {
 	private $values;
 
-	function __construct($title, $instructions, $name, $pre, $default_value, $required, $values) {
-		parent::__construct($title, $instructions, $name, $pre, $default_value, $required);
+	function __construct($title, $instructions, $name, $pre, $default_value, $values) {
+		parent::__construct($title, $instructions, $name, $pre, $default_value);
 		$this->values=$values;
 	}
 
@@ -1073,10 +1070,10 @@ class multiple_text_input extends Variable {
 }
 
 class string_flags_input extends check_selection_input {  // INFO: This class uses that same display_variable function as check_selection_input
-	function __construct($pre, $required) {
+	function __construct($pre) {
 		$default_value=array("compress_whitespace","ignore_case");
 		$values=array("Ignore case" => "ignore_case", "Trim whitespace" => "trim_whitespace", "Compress whitespace" => "compress_whitespace", "Remove whitespace" => "remove_whitespace", "Ignore order" => "ignore_order", "Ignore commas" => "ignore_commas", "Special or" => "special_or");
-		parent::__construct("String Flags", "", "strflags", $pre, $default_value, $required, $values);
+		parent::__construct("String Flags", "", "strflags", $pre, $default_value, $values);
 	}
 
 	public function submit_variable(&$_POST) {
@@ -1113,8 +1110,8 @@ class draw_background_input extends Variable{
 	private $color;
 	private $equation;
 
-	function __construct($pre, $required){
-		parent::__construct("Background", "", "background", $pre, "", $required);
+	function __construct($pre){
+		parent::__construct("Background", "", "background", $pre, "");
 		$this->values=array("Black" => "black", "Red" => "red", "Blue" => "blue", "Yellow" => "yellow", "Green" => "green", "Orange" => "orange", "Purple" => "purple", "Cyan" => "cyan", "Gray" => "gray", "White" => "white");
 		$this->color=$pre."color";
 		$this->equation=$pre."equation";
@@ -1179,8 +1176,8 @@ class required_times_input extends Variable { // TODO: Bug: has to do with the j
 	private $num;
 	private $values;
 
-	function __construct($pre, $required){
-		parent::__construct("Require Times", "", "requiretimes", $pre, "", $required);
+	function __construct($pre){
+		parent::__construct("Require Times", "", "requiretimes", $pre, "");
 		$this->symbol=$this->pre."symbol";
 		$this->equal=$this->pre."equal";
 		$this->num=$this->pre."num";
@@ -1257,8 +1254,8 @@ class required_times_input extends Variable { // TODO: Bug: has to do with the j
 class hint_text_input extends Variable {
 	private $minimum_rows;
 
-	function __construct($pre, $required){
-		parent::__construct("Hint Text", "", "hints", $pre, "", $required);
+	function __construct($pre){
+		parent::__construct("Hint Text", "", "hints", $pre, "");
 		$this->minimum_rows=1;
 	}
 
@@ -1305,8 +1302,8 @@ class hint_text_input extends Variable {
 }
 
 class qtext_input extends Variable {
-	function __construct($pre, $required) {
-		parent::__construct("Question", "", "qtext", $pre, "", $required);
+	function __construct($pre) {
+		parent::__construct("Question", "", "qtext", $pre, "");
 	}
 
 	public function display_variable($myq,&$line) {
@@ -1327,8 +1324,8 @@ class qtext_input extends Variable {
 }
 
 class uvariables_input extends Variable {
-	function __construct($pre, $required) {
-		parent::__construct("User Defined Variables", "", "uvariables", $pre, "", $required);
+	function __construct($pre) {
+		parent::__construct("User Defined Variables", "", "uvariables", $pre, "");
 	}
 
 	public function display_variable($myq,&$line) {
