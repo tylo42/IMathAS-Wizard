@@ -1,7 +1,9 @@
 <?php
 /*
  * Author:	Tyler Hyndman
- * Date:	August 21, 2009
+ * TODO:	
+ * 		* Remove all the create_<variable name> functions and replace
+ * 		  them with insert_required and insert_optional
  */
 
 require_once("variable.php");

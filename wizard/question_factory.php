@@ -6,14 +6,8 @@
  * 	
  */
 
-
 require_once("variable.php");
 require_once("question.php");
-
-
-
-
-//$xml = simplexml_load_file("questions.xml");
 
 $xml = new DOMDocument();
 $xml->load("questions.xml"); //make sure path is correct 
@@ -84,8 +78,12 @@ class question_set_factory {
 	private function create_text($variable) {
 		$title = $variable->getElementsByTagName("title")->item(0)->nodeValue;
 		$instructions = $variable->getElementsByTagName("instructions")->item(0)->nodeValue;  // Note: this may be moved out of the XML
+		$name = $variable->getElemetnsByTagName("name")->item(0)->nodeValue;
+		$pre = ???
+		$default = $variable->getAttribute("default");
+		$ignore_quotes = 
 		
-		return new text_input($title, $instructions, $name, $pre, $default_value, $required, $ignore_quotes);
+		return new text_input($title, $instructions, $name, $pre, $default, $ignore_quotes);
 	}
 	
 	private function create_radio($variable) {

@@ -7,7 +7,7 @@
  * 	- Make all member data privite
  * 	- Split into 4 classes:
  * 		+ Hold data
- * 		+ Display Variable
+ * 		+ Display Variable  $myq should be moved here
  * 		+ Parse Variable
  * 		+ Submit Variable
  */
@@ -18,14 +18,13 @@ abstract class Variable {
 	abstract public function submit_variable(&$_POST);
 	abstract public function parse_variable($control_line,&$line);
 	
-   // the protected variables should become private
-	protected $title;
-	protected $name;
-	protected $pre;
-	protected $myq;
-	protected $default_value;
-	protected $instructions;
-	protected $id; // TO BE REMOVED
+	// the protected variables should become private
+	private $title;
+	private $name;
+	private $pre;
+	private $myq;
+	private $default_value;
+	private $instructions;
 
 	public function __construct($title, $instructions, $name, $pre, $default_value) {
 		$this->title=$title;
@@ -33,9 +32,8 @@ abstract class Variable {
 		$this->name=$name;
 		$this->pre=$pre;
 		$this->default_value=$default_value;
-		$this->id=$pre.$name;
 	}
-	
+
 	public function get_title() { return $this->title; }
 	public function get_name() { return $this->name; }
 	public function get_pre() { return $this->pre; }
@@ -43,6 +41,9 @@ abstract class Variable {
 	public function get_default_value() { return $this->default_value; }
 	public function get_instructions() { return $this->instructions; }
 	public function get_id() { return $this->pre.$this->name; }
+
+	// set function should be removed someday
+	public function set_myq($myq) { $this->myq = $myq; }
 
    /** Display Function: used to print [+][-], grayed out if not my question
     * 
@@ -56,7 +57,7 @@ abstract class Variable {
 			$ret.= "<span class=pointer onclick=\"$jsadd\">[+]</span><span class=pointer onclick=\"$jsremove\">[-]</span>";
 		} else {
 			$ret.="<span style='color: gray'>[+][-]</span>";
-      }
+		}
 
 		return $ret;
 	}
@@ -78,20 +79,19 @@ abstract class Variable {
 	protected function display_menu_selection(&$line,$name,$values,$default_value,$onchange="") {
 		if($line[$name]=="") {
 			$line[$name]=$default_value;
-      }
-      
-		if(!$this->get_myq()) {
-			 $disabled="disabled='disabled'";
-      }
+		}
 		
-      if($onchange!="") {
+		if(!$this->get_myq()) {
+			$disabled="disabled='disabled'";
+		}
+		
+		if($onchange!="") {
 			$onchange="onchange=\"$onchange\"";
-      }
-			
+		}
 		$ret.="<select name='$name' $disabled $onchange>";
 		foreach($values as $display_value => $value) {
 			$ret.=$this->display_menu_option($line, $name, $value, $display_value);
-      }
+		}
 		$ret.="</select>";
 		return $ret;
 	}
@@ -100,7 +100,7 @@ abstract class Variable {
 		$opt_value="value='$value'";
 		if ($line[$name]==$value) {
 			$selected.="selected";
-      }
+		}
       
 		if($value=="<disabled>") {
 			$disabled="disabled='disabled'";
@@ -119,11 +119,11 @@ abstract class Variable {
 	protected function display_single_selection_input($type,$name,$value,$input){
 		if($value==$input) {
 			$checked="checked";
-      }
+		}
       
 		if(!$this->get_myq()) {
 			$disabled=" disabled";
-      }
+		}
       
 		return "<input type='$type' name='$name' value='$value' $checked $disabled />";
 	}
@@ -131,18 +131,18 @@ abstract class Variable {
 	protected function display_text_input($name,$value,$size=60){
 		if(!$this->myq) {
 			$readonly="readonly='readonly'";
-      }
-      
+		}
+
 		return "<input type='text' name='$name' value='$value' size='$size' $readonly />";
 	}
 
 	protected function display_text_table_input($myq, &$line, $values) {
 		$ret.="<table>";
 		foreach($values as $display_value => $value) {
-			if(!isset($line[$this->id.$value])) {
-				$line[$this->id.$value]=$this->default_value[$value];
+			if(!isset($line[$this->get_id().$value])) {
+				$line[$this->get_id().$value]=$this->default_value[$value];
          }
-			$ret.="<tr><td>$display_value:</td><td>".$this->display_text_input($this->id.$value,$line[$this->id.$value],15)."</td></tr>";
+			$ret.="<tr><td>$display_value:</td><td>".$this->display_text_input($this->get_id().$value,$line[$this->get_id().$value],15)."</td></tr>";
 		}
 		$ret.="</table><br />";
 		return $ret;
@@ -151,7 +151,7 @@ abstract class Variable {
 	protected function display_textarea_input($name,$value,$min_rows=4,$max_rows=20) {
 		if (!$this->myq) {
 			$readonly="readonly='readonly'";
-      }
+		}
 
 		$rows=min($max_rows,max($min_rows,substr_count($value,"\n")+1));
 		return "<textarea name='$name' id='$name' style='width: 100%' rows='$rows' $readonly >".$value."</textarea><br />";
@@ -160,7 +160,7 @@ abstract class Variable {
 	protected function display_title($jsadd="",$jsremove=""){
 		if($jsadd!=""&&$jsremove!="") {
 			$javascript=$this->add_remove_links($jsadd,$jsremove);
-      }
+		}
       
 		if($this->instructions!="") {
 			//$instructions.="($this->instructions)";
@@ -180,23 +180,24 @@ abstract class Variable {
 	protected function get_value($control_line,$ignore_quotes=false) {
 		list($variable,$value)=explode("=",$control_line,2); // separate the variable and value
 		$value=trim($value); // trim any excess whitespace
-		if(!$ignore_quotes)
+		if(!$ignore_quotes) {
 			$value = substr($value,1,-1); // remove first and last characters, the quotes
+		}
 		return $value;
 	}
 
 	protected function parse_one_line_value($control_line,&$line,$ignore_quotes) {
-		$line[$this->id]=$this->get_value($control_line,$ignore_quotes);
+		$line[$this->get_id()]=$this->get_value($control_line,$ignore_quotes);
 	}
 
 	protected function submit_one_line_value(&$_POST,$ignore_quotes){//TODO: Create unit test
       // if it is the default value do not put in control
-		if($_POST[$this->id]!=$this->default_value) { 
+		if($_POST[$this->get_id()]!=$this->default_value) { 
          // if we don't ignore quotes put quotes in
 			if(!$ignore_quotes) {
-				$_POST[$this->id] = '"'.$_POST[$this->id].'"';
-         }
-			$_POST['control'].="\$$this->name=".$_POST[$this->id]."\n\n";
+				$_POST[$this->get_id()] = '"'.$_POST[$this->get_id()].'"';
+			}
+			$_POST['control'].="\$$this->name=".$_POST[$this->get_id()]."\n\n";
 		}		
 		return $_POST;
 	}
@@ -208,19 +209,19 @@ class text_input extends Variable{
 	private $ignore_quotes;
 
 	function __construct($title, $instructions, $name, $pre, $default_value, $ignore_quotes) {
-		parent::__construct($title,$instructions,$name,$pre,$default_value);
+		parent::__construct($title, $instructions, $name, $pre, $default_value);
 		$this->ignore_quotes=$ignore_quotes;
 	}	
 
 	public function display_variable($myq,&$line) { //TODO: Create unit test
-		$this->myq=$myq;
-		if(!isset($line[$this->pre.$this->name])) {
-			$line[$this->pre.$this->name]=$this->default_value;
-      }
+		$this->set_myq($myq);
+		if(!isset($line[$this->get_pre().$this->get_name()])) {
+			$line[$this->get_pre().$this->get_name()]=$this->get_default_value();
+		}
 
 		$ret.=$this->display_title();
-		$ret.=$this->display_text_input($this->id, $line[$this->id], 60);
-		$ret.="<br /><br />";	
+		$ret.=$this->display_text_input($this->get_id(), $line[$this->get_id()], 60);
+		$ret.="<br /><br />";
 		return $ret;
 	}
 
@@ -242,13 +243,13 @@ class radio_selection_input extends Variable{
 	}
 
 	public function display_variable($myq,&$line){ //TODO: Create unit test
-		$this->myq=$myq;
-		if( !in_array($line[$this->id], $this->values) ) {
-			$line[$this->id]=$this->default_value;
-      }
+		$this->set_myq($myq);
+		if( !in_array($line[$this->get_id()], $this->values) ) {
+			$line[$this->get_id()]=$this->get_default_value();
+		}
 
 		$ret.=$this->display_title();
-		$ret.=$this->display_radio_selection_input($line,$this->id,$this->values)."<br />";
+		$ret.=$this->display_radio_selection_input($line,$this->get_id(),$this->values)."<br />";
 		return $ret;
 	}
 
@@ -270,43 +271,43 @@ class check_selection_input extends Variable{
 	}
 
 	public function display_variable($myq,&$line){ //TODO: Create unit test
-		$this->myq=$myq;
+		$this->set_myq($myq);
 		if( $this->empty_values($line) ) {
 			$this->choose_defaults($line);
 		}
 
 		$ret.=$this->display_title();
-		$ret.=$this->display_check_selection_input($line,$this->id,$this->values)."<br />";
+		$ret.=$this->display_check_selection_input($line,$this->get_id(),$this->values)."<br />";
 		return $ret;
 	}
 
 	protected function empty_values(&$line){
 		foreach($this->values as $value){
-			if( isset($line[$this->id.$value]) ) {
+			if( isset($line[$this->get_id().$value]) ) {
 				return false;
-         }
+			}
 		}
 		return true;
 	}
 
 	protected function choose_defaults(&$line) {
-		foreach ($this->default_value as $value) {
-			$line[$this->id.$value]="true";
-      }
+		foreach ($this->get_default_value() as $value) {
+			$line[$this->get_id().$value]="true";
+ 		}
 	}
 
 	public function submit_variable(&$_POST){ // unit test and refactor, do not put anything if defaults are choosen
-		$control="\$".$this->name."=\"";
+		$control="\$".$this->get_name()."=\"";
 		foreach($this->values as $value) {
-			if($_POST[$this->id.$value]==true) {
+			if($_POST[$this->get_id().$value]==true) {
 				$control.=$value.",";
-         }
+			}
 		}
 
 		$control=substr($control,0,-1)."\"\n";
 
-		if($control=="\$".$this->name."=\"\n")
-			$control="\$".$this->name."=\"\"\n";
+		if($control=="\$".$this->get_name()."=\"\n")
+			$control="\$".$this->get_name()."=\"\"\n";
 		$_POST['control'].=$control;
 	}
 
@@ -315,12 +316,12 @@ class check_selection_input extends Variable{
 		$inputs=explode(",",$input);
 
 		foreach($this->values as $value) {
-			$line[$this->id.$value]="false";
-      }
+			$line[$this->get_id().$value]="false";
+		}
 
 		foreach($inputs as $value) {
 			$value=trim($value);
-			$line[$this->id.$value]="true";
+			$line[$this->get_id().$value]="true";
 		}
 	}
 }
@@ -334,15 +335,10 @@ class menu_selection_input extends Variable {
 	}
 
 	public function display_variable($myq, &$line) { //TODO: Create unit test
-		$this->myq=$myq;
-		
-		// The following commented lines should be deleted soon
-		
-		//if(!in_array($line[$this->pre.$this->name],$this->values))
-		//	$line[$this->pre.$this->name]=$this->default_value;
+		$this->set_myq($myq);
 
 		$ret.=$this->display_title();
-		$ret.=$this->display_menu_selection($line,$this->id,$this->values,$this->default_value)."<br /><br />";
+		$ret.=$this->display_menu_selection($line,$this->get_id(),$this->values,$this->get_default_value())."<br /><br />";
 		return $ret;
 	}
 
@@ -363,7 +359,7 @@ class multiple_answers_questions extends Variable{
 	}
 	
 	public function display_variable($myq, &$line) {
-		$this->myq=$myq;
+		$this->set_myq($myq);
 		$ret.=$this->display_title();
 		
 		return $ret;
@@ -384,24 +380,24 @@ class choices_answer extends Variable{
 	}
 	
 	public function display_variable($myq, &$line){
-		$this->myq=$myq;
-		$ret.=$this->display_title("addRow('".$this->id."',1)","removeRow('".$this->id."',3)");
+		$this->set_myq($myq);
+		$ret.=$this->display_title("addRow('".$this->get_id()."',1)","removeRow('".$this->get_id()."',3)");
 
-		if( !isset($line[$this->id.'size']) ) {
-			$line[$this->id.'size']=4;
-      }
+		if( !isset($line[$this->get_id().'size']) ) {
+			$line[$this->get_id().'size']=4;
+		}
       
-		if( !isset($line[$this->id.'correct']) ) {
-			$line[$this->id.'correct']=0;
-      }
+		if( !isset($line[$this->get_id().'correct']) ) {
+			$line[$this->get_id().'correct']=0;
+		}
 		
-		$ret.="<table id='".$this->id."' valign='top'>";
+		$ret.="<table id='".$this->get_id()."' valign='top'>";
 		$ret.="<tr><td></td><td><u>Choice</u></td><td><u>Correct</u></td></tr>";
-		for($x=0;$x<($line[$this->id.'size']);$x++) {
+		for($x=0;$x<($line[$this->get_id().'size']);$x++) {
 			$ret.="<tr>";
 			$ret.="<td>".($x+1).":</td>";
-			$ret.="<td>".$this->display_text_input($this->id.($x+1),$line[$this->id.($x+1)],60)."</td>";
-			$ret.="<td>".$this->display_single_selection_input("radio",$this->id."correct",$x,$line[$this->id."correct"])."</td>";
+			$ret.="<td>".$this->display_text_input($this->get_id().($x+1),$line[$this->get_id().($x+1)],60)."</td>";
+			$ret.="<td>".$this->display_single_selection_input("radio",$this->get_id()."correct",$x,$line[$this->get_id()."correct"])."</td>";
 			$ret.="</tr>";
 		}
 		$ret.="</table>";
@@ -412,17 +408,17 @@ class choices_answer extends Variable{
 	
 	public function submit_variable(&$_POST) {
 		$size=1;
-		while( isset($_POST[$this->id.$size]) ) {
-			$_POST['control'].="\$choices[".($size-1)."]=".$_POST[$this->id.$size]."\n";
+		while( isset($_POST[$this->get_id().$size]) ) {
+			$_POST['control'].="\$choices[".($size-1)."]=".$_POST[$this->get_id().$size]."\n";
 			$size++;
 		}
 	
-		$_POST[$this->id.'size']=$size;
+		$_POST[$this->get_id().'size']=$size;
 		
-		if( !isset($_POST[$this->id.'correct']) ) { // if no radio button is selected
-			$_POST[$this->id.'correct']=0;
-      }
-		$_POST['control'].="\n\$answer=".($_POST[$this->id.'correct'])."\n\n";
+		if( !isset($_POST[$this->get_id().'correct']) ) { // if no radio button is selected
+			$_POST[$this->get_id().'correct']=0;
+		}
+		$_POST['control'].="\n\$answer=".($_POST[$this->get_id().'correct'])."\n\n";
 	}
 	
 	public function parse_variable($control_line,&$line){
@@ -430,20 +426,20 @@ class choices_answer extends Variable{
 			$this->parse_choices($control_line,$line);
 		} else if(strpos($control_line,"\$answer")!==false) {
 			$this->parse_answer($control_line,$line);
-      }
+		}
 	}
 	
 	protected function parse_choices($control_line,&$line){
 		$index=$this->get_index($control_line);
-		$line[$this->id.$index]=$this->get_value($control_line,true);
+		$line[$this->get_id().$index]=$this->get_value($control_line,true);
 
-		if($index>$line[$this->id.'size']) {
-			$line[$this->id.'size']=$index;
-      }
+		if($index>$line[$this->get_id().'size']) {
+			$line[$this->get_id().'size']=$index;
+		}
 	}
 	
 	protected function parse_answer($control_line,&$line) {
-		$line[$this->id."correct"]=$this->get_value($control_line,true);
+		$line[$this->get_id()."correct"]=$this->get_value($control_line,true);
 	}
 }
 
@@ -453,21 +449,20 @@ class multans_answer extends Variable{
 	}
 	
 	public function display_variable($myq,&$line) {
-		$this->myq=$myq;
-		$ret.=$this->display_title("addRow('".$this->id."',1)","removeRow('".$this->id."',3)");
+		$this->set_myq($myq);
+		$ret.=$this->display_title("addRow('".$this->get_id()."',1)","removeRow('".$this->get_id()."',3)");
 
-		if(!isset($line[$this->id.'size']))
-			$line[$this->id.'size']=4;
-		//if(!isset($line[$this->id.'correct']))
-		//	$line[$this->id.'correct']=0;
+		if(!isset($line[$this->get_id().'size'])) {
+			$line[$this->get_id().'size']=4;
+		}
 		
-		$ret.="<table id='".$this->id."' valign='top'>";
+		$ret.="<table id='".$this->get_id()."' valign='top'>";
 		$ret.="<tr><td></td><td><u>Choice</u></td><td><u>Correct</u></td></tr>";
-		for($x=0;$x<($line[$this->id.'size']);$x++){
+		for($x=0;$x<($line[$this->get_id().'size']);$x++){
 			$ret.="<tr>";
 			$ret.="<td>".($x+1).":</td>";
-			$ret.="<td>".$this->display_text_input($this->id.($x+1),$line[$this->id.($x+1)],60)."</td>";
-			$ret.="<td>".$this->display_single_selection_input("checkbox",$this->id."correct".($x+1),"true",$line[$this->id."correct".($x+1)])."</td>";
+			$ret.="<td>".$this->display_text_input($this->get_id().($x+1),$line[$this->get_id().($x+1)],60)."</td>";
+			$ret.="<td>".$this->display_single_selection_input("checkbox",$this->get_id()."correct".($x+1),"true",$line[$this->get_id()."correct".($x+1)])."</td>";
 			$ret.="</tr>";
 		}
 		$ret.="</table>";
@@ -478,16 +473,16 @@ class multans_answer extends Variable{
 	
 	public function submit_variable(&$_POST){
 		$size=1;
-		while( isset($_POST[$this->id.$size]) ) {
-			$_POST['control'].="\$choices[".($size-1)."]=".$_POST[$this->id.$size]."\n";
+		while( isset($_POST[$this->get_id().$size]) ) {
+			$_POST['control'].="\$choices[".($size-1)."]=".$_POST[$this->get_id().$size]."\n";
 			$size++;
 		}
 	
-		$_POST[$this->id.'size']=$size;
+		$_POST[$this->get_id().'size']=$size;
 
 		$answer="\$answers=\"";
 		for($x=0;$x<$size;$x++) {
-			if($_POST[$this->id."correct".($x+1)]=="true"){
+			if($_POST[$this->get_id()."correct".($x+1)]=="true"){
 				$checked=1;
 				$answer.=$x.",";
 			}
@@ -496,7 +491,7 @@ class multans_answer extends Variable{
 		
 		if(!$checked) {
 			$answer="\$answers=\"-1\"";
-      }
+		}
 
 		$_POST['control'].="\n".$answer."\n\n";
 	}
@@ -506,24 +501,24 @@ class multans_answer extends Variable{
 			$this->parse_choices($control_line,$line);
 		} else if(strpos($control_line,"\$answer")!==false) {
 			$this->parse_answer($control_line,$line);
-      }
+		}
 	}
 	
 	protected function parse_choices($control_line,&$line) {
 		$index=$this->get_index($control_line);
 
-		$line[$this->id.$index]=$this->get_value($control_line,true);
+		$line[$this->get_id().$index]=$this->get_value($control_line,true);
 		
-		if($index>$line[$this->id.'size']) {
-			$line[$this->id.'size']=$index;
-      }
+		if($index>$line[$this->get_id().'size']) {
+			$line[$this->get_id().'size']=$index;
+		}
 	}
 	
 	protected function parse_answer($control_line,&$line) {
 		$correct=$this->get_value($control_line,false);
 		
 		foreach(explode(",",$correct) as $x) {
-			$line[$this->id."correct".($x+1)]="true";
+			$line[$this->get_id()."correct".($x+1)]="true";
 		}
 	}
 }
@@ -535,23 +530,23 @@ class matching_answer extends Variable{ // works
 
 	function __construct($pre) {
 		parent::__construct("Choices", "", "choices", $pre, "");
-		$this->questions=$pre."questions";
-		$this->answers=$pre."answers";
-		$this->correct=$pre."correct";
+		$this->questions=$this->get_id()."questions";
+		$this->answers=$this->get_id()."answers";
+		$this->correct=$this->get_id()."correct";
 	}
 	
 	public function display_variable($myq,&$line) {
-		$this->myq=$myq;
+		$this->set_myq=($myq);
 		$ret.=$this->display_title();
 		
 		// Set defaults, should be in some kind of function
 		if(!isset($line[$this->questions.'size'])) {
 			$line[$this->questions.'size']=4;
-      }
-      
+		}
+
 		if(!isset($line[$this->answers.'size'])) {
 			$line[$this->answers.'size']=4;
-      }
+		}
       
 		if(!isset($line[$this->correct.'1'])) {
 			for($x=1; $x<=4; $x++) {
@@ -560,11 +555,11 @@ class matching_answer extends Variable{ // works
 		}
 
 
-		$ret.="<table id=\"".$this->id."question\" valign=\"top\">";
-		$ret.="<tr align=\"center\"><td></td><td align=\"left\">Question Text: ".$this->add_remove_links("addRowMatQ('".$this->id."question')","removeRow('".$this->id."question',3)")."</td>";
+		$ret.="<table id=\"".$this->get_id()."question\" valign=\"top\">";
+		$ret.="<tr align=\"center\"><td></td><td align=\"left\">Question Text: ".$this->add_remove_links("addRowMatQ('".$this->get_id()."question')","removeRow('".$this->get_id()."question',3)")."</td>";
 		for($x=0;$x<$line[$this->answers.'size'];$x++) {
 			$ret.="<td>".chr($x+97)."</td>";
-      }
+		}
 		$ret.="</tr>";
 		for($x=0; $x<$line[$this->questions.'size']; $x++) {
 			$ret.="<tr align='center'>";
@@ -581,8 +576,8 @@ class matching_answer extends Variable{ // works
 		$ret.="<br>";
 
 		// ==== Answer Table ====
-		$ret.="<table id=\"".$this->id."answer\" valign=\"top\">";
-		$ret.="<tr align=\"center\"><td></td><td align=\"left\">Answer Text: ".$this->add_remove_links("addRowMatA('".$this->id."answer','".$this->id."question')","removeRowMatA('".$this->id."answer','".$this->id."question',3)")."</td>";
+		$ret.="<table id=\"".$this->get_id()."answer\" valign=\"top\">";
+		$ret.="<tr align=\"center\"><td></td><td align=\"left\">Answer Text: ".$this->add_remove_links("addRowMatA('".$this->get_id()."answer','".$this->get_id()."question')","removeRowMatA('".$this->get_id()."answer','".$this->get_id()."question',3)")."</td>";
 		$ret.="</tr>";
 		for($x=0;$x<$line[$this->answers.'size'];$x++) {
 			$ret.="<tr align=\"center\">";
@@ -601,32 +596,32 @@ class matching_answer extends Variable{ // works
 		$qsize=1;
 		while(isset($_POST[$this->questions.$qsize])) {
 			$qsize++;
-      }
+		}
 		$_POST[$this->questions.'size']=$qsize;
 
 		// get the number of answers
 		$asize=1;
 		while(isset($_POST[$this->answers.$asize])) {
 			$asize++;
-      }
+		}
 		$_POST[$this->answers.'size']=$asize;
 
 		// ==== $questions ==== 
 		for($x=1;$x<$qsize;$x++) {
 			$_POST['control'].="\$questions[".($x-1)."]=".$_POST[$this->questions.$x]."\n";
-      }
+		}
 
 		// ==== $answers ==== 
 		for($x=1;$x<$asize;$x++) {
 			$_POST['control'].="\$answers[".($x-1)."]=".$_POST[$this->answers.$x]."\n";
-      }
+		}
 
 		// ==== $matchlist ==== 
 		$_POST['control'].="\n\$matchlist=\"";
 		for($x=1;$x<$qsize;$x++) {
 			if(!isset($_POST[$this->correct.$x])) { // if there was no selection
 				$_POST[$this->correct.$x]=1;
-         }
+			}
 			$_POST['control'].=($_POST[$this->correct.$x]-1).",";
 		}
 		$_POST['control'] = substr($_POST['control'],0,-1);
@@ -636,11 +631,11 @@ class matching_answer extends Variable{ // works
 	public function parse_variable($control_line,&$line) {
 		if( (strpos($control_line,"\$questions")!==false) || (strpos($control_line,"\$choices")!==false) ) {
 			$this->parse_choices($control_line,$line);
-      } else if(strpos($control_line,"\$answers")!==false) {
+		} else if(strpos($control_line,"\$answers")!==false) {
 			$this->parse_answers($control_line,$line);
 		} else if(strpos($control_line,"\$matchlist")!==false) {
 			$this->parse_matchlist($control_line,$line);
-      }
+		}
 	}
 	
 	protected function parse_choices($control_line,&$line) { // similar function to parse_answers
@@ -650,7 +645,7 @@ class matching_answer extends Variable{ // works
 		
 		if($index>$line[$this->questions.'size']) {
 			$line[$this->questions.'size']=$index;
-      }
+		}
 	}
 	
 	protected function parse_answers($control_line,&$line) {
@@ -660,7 +655,7 @@ class matching_answer extends Variable{ // works
 		
 		if($index>$line[$this->answers.'size']) {
 			$line[$this->answers.'size']=$index;
-      }
+		}
 	}
 	
 	protected function parse_matchlist($control_line,&$line) {
@@ -674,45 +669,45 @@ class matching_answer extends Variable{ // works
 }
 
 class matrix_answer extends Variable {  // works 
-	function __construct($title, $instructions, $name, $pre, $default_value){
+	function __construct($title, $instructions, $name, $pre, $default_value) {
 		parent::__construct($title, $instructions, $name, $pre, $default_value);
 	}
 
 	public function display_variable($myq,&$line){
-		$this->myq=$myq;
+		$this->set_myq($myq);
 		$ret.=$this->display_title();
 
 
 		$ret.="<table>";
-		$ret.="<tr><td>Rows: </td><td>".$this->add_remove_links("addRow('".$this->id."',0,false)","removeRow('".$this->id."',1)")."</td></tr>";
-		$ret.="<tr><td>Columns: </td><td>".$this->add_remove_links("addCol('".$this->id."')","removeCol('".$this->id."',1)")."</td></tr>";
+		$ret.="<tr><td>Rows: </td><td>".$this->add_remove_links("addRow('".$this->get_id()."',0,false)","removeRow('".$this->get_id()."',1)")."</td></tr>";
+		$ret.="<tr><td>Columns: </td><td>".$this->add_remove_links("addCol('".$this->get_id()."')","removeCol('".$this->get_id()."',1)")."</td></tr>";
 		$ret.="</table>";
 
 		//answer grid
-		if($line[$this->id.'rowsize']==0) {
-			$line[$this->id.'rowsize']=3;
-      }
+		if($line[$this->get_id().'rowsize']==0) {
+			$line[$this->get_id().'rowsize']=3;
+		}
       
-		if($line[$this->id.'colsize']==0) {
-			$line[$this->id.'colsize']=3;
-      }
+		if($line[$this->get_id().'colsize']==0) {
+			$line[$this->get_id().'colsize']=3;
+		}
 
 		// This is needed for the big brackets, probably should be moved later
 		$ret.="<link rel=\"stylesheet\" href=\"/imathas-development/assessment/mathtest.css\" type=\"text/css\"/>";
 
 		$ret.="<table><tr><td class='matrixleft'>&nbsp;</td><td>";
-		$ret.="<table id='".$this->id."'>";
-		for($row=0;$row<$line[$this->id.'rowsize'];$row++) {
+		$ret.="<table id='".$this->get_id()."'>";
+		for($row=0;$row<$line[$this->get_id().'rowsize'];$row++) {
 			$ret.="<tr>";
-			for($col=0;$col<$line[$this->id.'colsize'];$col++) {
-				$ret.="<td>".$this->display_text_input($this->id.($col+1)."_".($row+1),$line[$this->id.($col+1).'_'.($row+1)],3)."</td>";
+			for($col=0;$col<$line[$this->get_id().'colsize'];$col++) {
+				$ret.="<td>".$this->display_text_input($this->get_id().($col+1)."_".($row+1),$line[$this->get_id().($col+1).'_'.($row+1)],3)."</td>";
 			}
-         $ret.="</tr>";
+			$ret.="</tr>";
 		}
 		$ret.="</table>";
 		$ret.="</td><td class=\"matrixright\">&nbsp;</td></tr></table>";
 
-		$ret.=$this->display_check_selection_input($line,$this->id,array("Display answer size" => "answersize"),null)."<br />";
+		$ret.=$this->display_check_selection_input($line,$this->get_id(),array("Display answer size" => "answersize"),null)."<br />";
 		
 		return $ret;
 	}
@@ -722,11 +717,11 @@ class matrix_answer extends Variable {  // works
 		
 		$col=1;
 		$row=1;
-		while(isset($_POST[$this->id.'1_'.$row])) {
+		while(isset($_POST[$this->get_id().'1_'.$row])) {
 			$col=1;
 			$answer.="(";
-			while(isset($_POST[$this->id.$col.'_'.$row])) {
-				$answer.=$_POST[$this->id.$col.'_'.$row].",";
+			while(isset($_POST[$this->get_id().$col.'_'.$row])) {
+				$answer.=$_POST[$this->get_id().$col.'_'.$row].",";
 				$col++;
 			}
 			$answer=substr_replace($answer,"",-1)."),";  // Change this to substr
@@ -734,7 +729,7 @@ class matrix_answer extends Variable {  // works
 		}
 		$answer=substr($answer,0,-1)."]\"";
 		
-		if($_POST[$this->id.'answersize']=="true") {
+		if($_POST[$this->get_id().'answersize']=="true") {
 			$answersize="\$answersize=\"".($row-1).",".($col-1)."\"";
 		}
 		
@@ -747,14 +742,14 @@ class matrix_answer extends Variable {  // works
 			$this->parse_answersize_input($control_line,$line);
 		} else if(strpos($control_line,"\$answer")!==false) {
 			$this->parse_answer_input($control_line,$line);
-      }
+		}
 	}
 	
 	protected function parse_answersize_input($control_line,&$line){
 		$string=$this->get_value($control_line);
 		list($rows,$cols)=explode(",",$string);
 		
-		$line[$this->id.'answersize']="true";
+		$line[$this->get_id().'answersize']="true";
 		$this->set_rows_cols($rows,$cols,$line);
 	}
 	
@@ -779,15 +774,15 @@ class matrix_answer extends Variable {  // works
 			}
 			
 			$cols++;
-			$line[$this->id.$cols.'_'.$rows]=$value;
+			$line[$this->get_id().$cols.'_'.$rows]=$value;
 		}
 		
 		$this->set_rows_cols($rows,$cols,$line);
 	}
 	
 	protected function set_rows_cols($rows,$cols,&$line) {
-		$line[$this->id.'rowsize']=trim($rows);
-		$line[$this->id.'colsize']=trim($cols);
+		$line[$this->get_id().'rowsize']=trim($rows);
+		$line[$this->get_id().'colsize']=trim($cols);
 	}
 }
 
@@ -797,21 +792,21 @@ class draw_answer_input extends Variable { // works, could use some modification
 
 	function __construct($pre) {
 		parent::__construct("Answers", "", "answers", $pre, "");
-		$this->function=$pre."function";
-		$this->type=$pre."type";
+		$this->function=$this->get_id()."function";
+		$this->type=$this->get_id()."type";
 	}
 
 	public function display_variable($myq,&$line) {
-		$this->myq=$myq;
-		$ret.=$this->display_title("addRow('".$this->id."',1,true,true)","removeRow('".$this->id."',2)");
+		$this->set_myq($myq);
+		$ret.=$this->display_title("addRow('".$this->get_id()."',1,true,true)","removeRow('".$this->get_id()."',2)");
 		
-		if(!isset($line[$this->id.'size'])) {
-			$line[$this->id.'size']=1;
-      }
+		if(!isset($line[$this->get_id().'size'])) {
+			$line[$this->get_id().'size']=1;
+		}
 		
-		$ret.="<table id=".$this->id.">";
+		$ret.="<table id=".$this->get_id().">";
 		$ret.="<tr><td></td><td>Draw Type</td><td>Parameters</td><td>Weight</td></tr>";
-		for($x=0;$x<$line[$this->id.'size'];$x++) {
+		for($x=0;$x<$line[$this->get_id().'size'];$x++) {
 			$ret.="<tr>";
 			$ret.="<td>".($x+1).":</td>";
 			$values=array("--- Select Answer Type ---" => "<disabled>", "Function" => "func".($x+1), "Dot" => "dot".($x+1));
@@ -821,7 +816,7 @@ class draw_answer_input extends Variable { // works, could use some modification
 			$display="display:none";
 			if($line[$this->type.($x+1)]=="func".($x+1)) {
 				$display="display:block";
-         }
+			}
 			$ret.="<div id='func".($x+1)."' style='$display'>";
 			$ret.="f(x)= ".$this->display_text_input($this->function.($x+1),$line[$this->function.($x+1)],10);
 			$ret.=" Min: ".$this->display_text_input($this->function."min".($x+1),$line[$this->function."min".($x+1)],5);
@@ -831,7 +826,7 @@ class draw_answer_input extends Variable { // works, could use some modification
 			$display="display:none";
 			if($line[$this->type.($x+1)]=="dot".($x+1)) {
 				$display="display:block";
-         }
+			}
 			$ret.="<div id='dot".($x+1)."' style='$display'>";
 			$ret.=" x: ".$this->display_text_input($this->dot."x".($x+1),$line[$this->dot."x".($x+1)],5);
 			$ret.=" y: ".$this->display_text_input($this->dot."y".($x+1),$line[$this->dot."y".($x+1)],5);
@@ -841,7 +836,7 @@ class draw_answer_input extends Variable { // works, could use some modification
 			$ret.="</td>";
 			
 			$ret.="<td>";
-			$ret.=$this->display_text_input($this->id."weight".($x+1),$line[$this->id."weight".($x+1)],5);
+			$ret.=$this->display_text_input($this->get_id()."weight".($x+1),$line[$this->get_id()."weight".($x+1)],5);
 			$ret.="</td>";
 			
 			$ret.="</tr>";
@@ -856,8 +851,8 @@ class draw_answer_input extends Variable { // works, could use some modification
 		$size=1;
 		while(isset($_POST[$this->type.$size])) {
 			$size++;
-      }
-		$_POST[$this->id.'size']=$size;
+		}
+		$_POST[$this->get_id().'size']=$size;
 		
 		$weight="\$partweights=\"";
 		$empty_weight="\$partweights=\"";
@@ -872,7 +867,7 @@ class draw_answer_input extends Variable { // works, could use some modification
             }
 				$control.="\"\n";
 			}
-			$weight.=$_POST[$this->id."weight".($i+1)].",";
+			$weight.=$_POST[$this->get_id()."weight".($i+1)].",";
 			$empty_weight.=",";
 		}
 		$weight=substr($weight,0,-1)."\"\n";
@@ -880,7 +875,7 @@ class draw_answer_input extends Variable { // works, could use some modification
 		
 		if($weight==$empty_weight) {
 			$weight="";
-      }
+		}
 		
 		$_POST['control'].=$control."\n".$weight."\n";
 	}
@@ -890,7 +885,7 @@ class draw_answer_input extends Variable { // works, could use some modification
 			$this->parse_answers($control_line,$line);
 		} else if(strpos($control_line,"\$partweights")!==false) {
 			$this->parse_partweights($control_line,$line);
-      }
+		}
 	}
 	
 	protected function parse_answers($control_line,&$line){
@@ -910,9 +905,9 @@ class draw_answer_input extends Variable { // works, could use some modification
 			$line[$this->function."max".$index]=$values[2];
 		}
 		
-		if($index>$line[$this->id.'size']) {
-			$line[$this->id.'size']=$index;
-      }
+		if($index>$line[$this->get_id().'size']) {
+			$line[$this->get_id().'size']=$index;
+		}
 	}
 	
 	protected function parse_partweights($control_line,&$line){
@@ -920,7 +915,7 @@ class draw_answer_input extends Variable { // works, could use some modification
 		$values=explode(",",$value);
 		
 		for($x=0;$x<sizeof($values);$x++) {
-			$line[$this->id."weight".($x+1)]=$values[$x];
+			$line[$this->get_id()."weight".($x+1)]=$values[$x];
 		}
 	}
 }
@@ -936,20 +931,20 @@ class numfunc_variables_domain_input extends Variable {
 	}
 
 	public function display_variable($myq,&$line) {
-		$this->myq=$myq;
-		$ret.=$this->display_title("addRow('".$this->id."','1')","removeRow('".$this->id."',2)");
+		$this->set_myq($myq);
+		$ret.=$this->display_title("addRow('".$this->get_id()."','1')","removeRow('".$this->get_id()."',2)");
 
-		$ret.="<table id='".$this->id."'>";
+		$ret.="<table id='".$this->get_id()."'>";
 		$ret.="<tr><td></td><td><u>Variable</u></td><td><u>Min</u></td><td><u>Max</u></u></td></td><td><u>Integers</u></td></tr>";
 
-		if(!isset($line[$this->id.'size'])||$line[$this->id.'size']==0) {
-			$line[$this->id.'size']=1;
-      }
+		if(!isset($line[$this->get_id().'size'])||$line[$this->get_id().'size']==0) {
+			$line[$this->get_id().'size']=1;
+		}
 
-		for($x=0;$x<$line[$this->id.'size'];$x++) {
+		for($x=0;$x<$line[$this->get_id().'size'];$x++) {
 			$ret.="<tr>";
 			$ret.="<td>".($x+1).": </td>";
-			$ret.="<td>".$this->display_text_input($this->id.($x+1),$line[$this->id.($x+1)],10)."</td>";
+			$ret.="<td>".$this->display_text_input($this->get_id().($x+1),$line[$this->get_id().($x+1)],10)."</td>";
 			$ret.="<td>".$this->display_text_input($this->domain_min.($x+1),$line[$this->domain_min.($x+1)],5)."</td>";
 			$ret.="<td>".$this->display_text_input($this->domain_max.($x+1),$line[$this->domain_max.($x+1)],5)."</td>";
 			$ret.="<td>".$this->display_single_selection_input("checkbox",$this->integers.($x+1),"true",$line[$this->integers.($x+1)])."</td>";
@@ -965,40 +960,41 @@ class numfunc_variables_domain_input extends Variable {
 		$domain="\$domain=\"";
 
 		$size=1;
-		while(isset($_POST[$this->id.$size])) {
+		while(isset($_POST[$this->get_id().$size])) {
 			$size++;
-      }
-		$_POST[$this->id.'size']=$size;
+		}
+		$_POST[$this->get_id().'size']=$size;
 	
 		for($x=1;$x<$size;$x++) { // need some error checking for blank values in domain
 			if($x!=1) { // fix this
 				$variables.=",";
 				$domain.=",";
 			}
-			$variables.=$_POST[$this->id.$x];
+			$variables.=$_POST[$this->get_id().$x];
 			$domain.=$_POST[$this->domain_min.$x].",".$_POST[$this->domain_max.$x];
-			if($_POST[$this->integers.$x]=="true")
+			if($_POST[$this->integers.$x]=="true") {
 				$domain.=",integers";
+			}
 		}
 		$variables.="\"";
 		$domain.="\"";
 
 		if($variables!="\$variables=\"\"") {
 			$_POST['control'].=$variables."\n";
-      }
-      
+		}
+
 		if($variables!="\$domain=\"\"") {
 			$_POST['control'].=$domain."\n\n";
-      }
+		}
 	}
 
-   public function parse_variable($control_line,&$line){
-      if(strpos($control_line,"\$variables")!==false) {
-         $this->parse_variables_input($control_line,$line);
-      } else if(strpos($control_line,"\$domain")!==false) {
+	public function parse_variable($control_line,&$line){
+		if(strpos($control_line,"\$variables")!==false) {
+			$this->parse_variables_input($control_line,$line);
+		} else if(strpos($control_line,"\$domain")!==false) {
 			$this->parse_domain_input($control_line,$line);
-      }
-   }
+		}
+	}
 
 	protected function parse_variables_input($control_line,&$line) {
 		$string=$this->get_value($control_line);
@@ -1006,10 +1002,10 @@ class numfunc_variables_domain_input extends Variable {
 
 		$counter=1;
 		foreach($variables as $variable) {
-			$line[$this->id.$counter++]=$variable;
-      }
+			$line[$this->get_id().$counter++]=$variable;
+		}
 
-		$line[$this->id.'size']=$counter-1;
+		$line[$this->get_id().'size']=$counter-1;
 	}
 
 	protected function parse_domain_input($control_line,&$line) {
@@ -1038,7 +1034,7 @@ class multiple_text_input extends Variable {
 	}
 
 	public function display_variable($myq,&$line) {
-		$this->myq=$myq;
+		$this->set_myq($myq);
 		$ret.=$this->display_title();
 		$ret.=$this->display_text_table_input($myq, $line, $this->values);
 
@@ -1046,13 +1042,13 @@ class multiple_text_input extends Variable {
 	}
 
 	public function submit_variable(&$_POST) { // TODO: Do not submit if defaults are given
-		$control="\$".$this->name."=\"";
+		$control="\$".$this->get_name()."=\"";
 
 		foreach($this->values as $value) {
-			if($_POST[$this->id.$value]=="") {
-				$_POST[$this->id.$value]=$this->default_value[$value];
+			if($_POST[$this->get_id().$value]=="") {
+				$_POST[$this->get_id().$value]=$this->default_value[$value];
          }
-			$control.=$_POST[$this->id.$value].",";
+			$control.=$_POST[$this->get_id().$value].",";
 		}
 		
 		$_POST['control'].=substr($control,0,-1)."\"\n\n";
@@ -1063,7 +1059,7 @@ class multiple_text_input extends Variable {
 		$grid=explode(",",$string);
 		$counter=0;
 		foreach($this->values as $value) {// assumes that the order is maintained
-			$line[$this->id.$value]=trim($grid[$counter++]);
+			$line[$this->get_id().$value]=trim($grid[$counter++]);
 		}
 	}
 
@@ -1077,13 +1073,13 @@ class string_flags_input extends check_selection_input {  // INFO: This class us
 	}
 
 	public function submit_variable(&$_POST) {
-		$control="\$".$this->name."=\"";
+		$control="\$".$this->get_name()."=\"";
 		foreach($this->values as $value) {
-			if($_POST[$this->id.$value]==true) {
+			if($_POST[$this->get_id().$value]==true) {
 				$control.=$value."=1,";
 			} else {
 				$control.=$value."=0,";
-         }
+			}
 		}
 
 		$control=substr($control,0,-1)."\"\n";
@@ -1097,10 +1093,10 @@ class string_flags_input extends check_selection_input {  // INFO: This class us
 		foreach($inputs as $value){
 			$flag=explode("=",$value);
 			if($flag[1]==1) {
-				$line[$this->id.trim($flag[0])]="true";
+				$line[$this->get_id().trim($flag[0])]="true";
 			} else {
-				$line[$this->id.trim($flag[0])]="false";
-         }
+				$line[$this->get_id().trim($flag[0])]="false";
+			}
 		}
 	}
 }
@@ -1113,21 +1109,21 @@ class draw_background_input extends Variable{
 	function __construct($pre){
 		parent::__construct("Background", "", "background", $pre, "");
 		$this->values=array("Black" => "black", "Red" => "red", "Blue" => "blue", "Yellow" => "yellow", "Green" => "green", "Orange" => "orange", "Purple" => "purple", "Cyan" => "cyan", "Gray" => "gray", "White" => "white");
-		$this->color=$pre."color";
-		$this->equation=$pre."equation";
+		$this->color=$this->get_id()."color";
+		$this->equation=$this->get_id()."equation";
 	}
 
 	public function display_variable($myq,&$line){
-		$this->myq=$myq;
-		$ret.=$this->display_title("addRow('".$this->id."','1')","removeRow('".$this->id."',2)");
-		$ret.="<table id='".$this->id."'>";
+		$this->set_myq($myq);
+		$ret.=$this->display_title("addRow('".$this->get_id()."','1')","removeRow('".$this->get_id()."',2)");
+		$ret.="<table id='".$this->get_id()."'>";
 		$ret.="<tr><td></td><td></td><td>Equation</td><td>Color</td></tr>";
 
-		if(!isset($line[$this->id.'size'])||$line[$this->id.'size']==0) {
-			$line[$this->id.'size']=1;
-      }
+		if(!isset($line[$this->get_id().'size'])||$line[$this->get_id().'size']==0) {
+			$line[$this->get_id().'size']=1;
+		}
 
-		for($x=0;$x<$line[$this->id.'size'];$x++) {
+		for($x=0;$x<$line[$this->get_id().'size'];$x++) {
 			$ret.="<tr>";
 			$ret.="<td>".($x+1).": </td>";
 			$ret.="<td>y=</td>";
@@ -1145,12 +1141,12 @@ class draw_background_input extends Variable{
 			$size++;
 		}
 
-		$_POST[$this->id.'size']=$size;
+		$_POST[$this->get_id().'size']=$size;
 	
 		for($x=1;$x<$size;$x++) {
 			if($_POST[$this->equation.$x]!="") {
-				$_POST['control'].="\$".$this->name."[".($x-1)."]=\"".$_POST[$this->equation.$x].",".$_POST[$this->color.$x]."\"\n";
-         }
+				$_POST['control'].="\$".$this->get_name()."[".($x-1)."]=\"".$_POST[$this->equation.$x].",".$_POST[$this->color.$x]."\"\n";
+			}
 		}
 		$_POST['control'].="\n";
 	}
@@ -1158,9 +1154,9 @@ class draw_background_input extends Variable{
 	public function parse_variable($control_line,&$line){
 		$index=$this->get_index($control_line);
 
-		if($index>$line[$this->id.'size']) {
-			$line[$this->id.'size']=$index;
-      }
+		if($index>$line[$this->get_id().'size']) {
+			$line[$this->get_id().'size']=$index;
+		}
 
 		// get the equation and color
 		$string=$this->get_value($control_line);
@@ -1178,23 +1174,23 @@ class required_times_input extends Variable { // TODO: Bug: has to do with the j
 
 	function __construct($pre){
 		parent::__construct("Require Times", "", "requiretimes", $pre, "");
-		$this->symbol=$this->pre."symbol";
-		$this->equal=$this->pre."equal";
-		$this->num=$this->pre."num";
+		$this->symbol=$this->get_id()."symbol";
+		$this->equal=$this->get_id()."equal";
+		$this->num=$this->get_id()."num";
 		$this->values=array("=" => "=", "&lt" => "<", "&gt" => ">", "&lt=" => "<=", "&gt=" => ">=");
 	}
 
 	function display_variable($myq,&$line) {
-		$this->myq=$myq;
-		$ret.=$this->display_title("addRow('".$this->id."','1')","removeRow('".$this->id."',2)");
-		$ret.="<table id=\"".$this->id."\" valign='top'>";
+		$this->set_myq($myq);
+		$ret.=$this->display_title("addRow('".$this->get_id()."','1')","removeRow('".$this->get_id()."',2)");
+		$ret.="<table id=\"".$this->get_id()."\" valign='top'>";
 		$ret.="<tr><td></td><td>Symbol</td><td></td><td>Number</td></tr>";
 	
-		if(!isset($line[$this->id.'size'])) {
-			$line[$this->id.'size']=1;
-      }
+		if(!isset($line[$this->get_id().'size'])) {
+			$line[$this->get_id().'size']=1;
+		}
 
-		for($x=0;$x<($line[$this->id.'size']);$x++) {
+		for($x=0;$x<($line[$this->get_id().'size']);$x++) {
 			$ret.="<tr>";
 			$ret.="<td>".($x+1).":</td>";
 			$ret.="<td>".$this->display_text_input($this->symbol.($x+1),$line[$this->symbol.($x+1)],15)."</td>";
@@ -1208,11 +1204,11 @@ class required_times_input extends Variable { // TODO: Bug: has to do with the j
 
 	public function submit_variable(&$_POST) {
 		$size=1;
-		$_POST['control'].="\$".$this->name."=\"";
+		$_POST['control'].="\$".$this->get_name()."=\"";
 		while(isset($_POST[$this->equal.$size])&&$_POST[$this->symbol.$size]!=""&&$eq.$_POST[$this->num.$size]!=""){
 			if($size!=1) {
 				$_POST['control'].=",";
-         }
+			}
 			$_POST['control'].=$_POST[$this->symbol.$size].",".$_POST[$this->equal.$size].$_POST[$this->num.$size];
 			$size++;
 		}
@@ -1235,7 +1231,7 @@ class required_times_input extends Variable { // TODO: Bug: has to do with the j
 			}
 			$counter++;
 		}
-		$line[$this->id.'size']=$counter-1;
+		$line[$this->get_id().'size']=$counter-1;
 	}
 
 	protected function parse_require_times($control_line) {
@@ -1260,17 +1256,17 @@ class hint_text_input extends Variable {
 	}
 
 	public function display_variable($myq,&$line){ //TODO: Create unit test
-		$this->myq=$myq;
-		if($line[$this->id.'size']==0) {
-			$line[$this->id.'size']=1;
+		$this->set_myq($myq);
+		if($line[$this->get_id().'size']==0) {
+			$line[$this->get_id().'size']=1;
       }
 
-		$ret.=$this->display_title("addRow('".$this->id."')","removeRow('".$this->id."',$this->minimum_rows)");
-		$ret.="<table id=\"".$this->id."\">";
-		for($row=0;$row<$line[$this->id.'size'];$row++) {
+		$ret.=$this->display_title("addRow('".$this->get_id()."')","removeRow('".$this->get_id()."',$this->minimum_rows)");
+		$ret.="<table id=\"".$this->get_id()."\">";
+		for($row=0;$row<$line[$this->get_id().'size'];$row++) {
 			$ret.="<tr>";
 			$ret.="<td>".($row+1).":</td>";
-			$ret.="<td>".$this->display_text_input($this->id.($row+1),$line[$this->id.($row+1)],60)."</td>";
+			$ret.="<td>".$this->display_text_input($this->get_id().($row+1),$line[$this->get_id().($row+1)],60)."</td>";
 			$ret.="</tr>";
 		}
 		$ret.="</table>";
@@ -1280,24 +1276,24 @@ class hint_text_input extends Variable {
 	public function submit_variable(&$_POST) {
 		// calulate the hint size
 		$size=1;
-		while(isset($_POST[$this->id.$size]) /*&&($_POST[$this->id.$size]!=""||$size!=1)*/) {
+		while(isset($_POST[$this->get_id().$size])) {
 			$size++;
       }
-		$_POST[$this->id.'size']=$size;
+		$_POST[$this->get_id().'size']=$size;
 	
 		for($x=1;$x<$size;$x++) {
-			$_POST['control'].="\$".$this->name."[".($x-1)."]=\"".$_POST[$this->id.$x]."\"\n";
-      }
+			$_POST['control'].="\$".$this->get_name()."[".($x-1)."]=\"".$_POST[$this->get_id().$x]."\"\n";
+		}
 	}
 
 	public function parse_variable($control_line,&$line) {
 		$index=$this->get_index($control_line);
 
-		$line[$this->id.$index]=$this->get_value($control_line);
+		$line[$this->get_id().$index]=$this->get_value($control_line);
 
-		if($index>$line[$this->id.'size']) {
-			$line[$this->id.'size']=$index;
-      }
+		if($index>$line[$this->get_id().'size']) {
+			$line[$this->get_id().'size']=$index;
+		}
 	}
 }
 
@@ -1307,19 +1303,19 @@ class qtext_input extends Variable {
 	}
 
 	public function display_variable($myq,&$line) {
-		$this->myq=$myq;
+		$this->set_myq($myq);
 		
-		$ret.=$this->display_title("incboxsize('".$this->id."')","decboxsize('".$this->id."')");
-		$ret.=$this->display_textarea_input($this->id,$line[$this->id]);
+		$ret.=$this->display_title("incboxsize('".$this->get_id()."')","decboxsize('".$this->get_id()."')");
+		$ret.=$this->display_textarea_input($this->get_id(),$line[$this->get_id()]);
 		return $ret;
 	}
 
 	public function submit_variable(&$_POST) {
-		$_POST['qtext']=$_POST[$this->pre.'qtext'];
+		$_POST['qtext']=$_POST[$this->get_pre().'qtext'];
 	}
 
 	public function parse_variable($control_line,&$line) {
-		$line[$this->pre.'qtext']=$line['qtext'];
+		$line[$this->get_pre().'qtext']=$line['qtext'];
 	}
 }
 
@@ -1329,19 +1325,19 @@ class uvariables_input extends Variable {
 	}
 
 	public function display_variable($myq,&$line) {
-		$this->myq=$myq;
+		$this->set_myq($myq);
 		
-		$ret.=$this->display_title("incboxsize('".$this->id."')","decboxsize('".$this->id."')");
-		$ret.=$this->display_textarea_input($this->id,$line[$this->id]);
+		$ret.=$this->display_title("incboxsize('".$this->get_id()."')","decboxsize('".$this->get_id()."')");
+		$ret.=$this->display_textarea_input($this->get_id(),$line[$this->get_id()]);
 		return $ret;
 	}
 
 	public function submit_variable(&$_POST) {
-		$_POST['control']=$_POST[$this->pre.'uvariables']."\n\n";
+		$_POST['control']=$_POST[$this->get_pre().'uvariables']."\n\n";
 	}
 
 	public function parse_variable($control_line,&$line) {
-		$line[$this->pre.'uvariables'].=$control_line."\n";
+		$line[$this->get_pre().'uvariables'].=$control_line."\n";
 	}
 }
 
