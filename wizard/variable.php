@@ -21,7 +21,7 @@ abstract class Variable {
 	// the protected variables should become private
 	private $title;
 	private $name;
-	private $pre;
+	private $pre;		// to be removed, duplicated in Question
 	private $myq;
 	private $default_value;
 	private $instructions;

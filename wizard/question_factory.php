@@ -1,7 +1,6 @@
 <?php
 /*
  * Author:	Tyler Hyndman
- * Date:	March 13, 2010
  * TODO:
  * 	
  */
@@ -10,15 +9,15 @@ require_once("variable.php");
 require_once("question.php");
 
 $xml = new DOMDocument();
-$xml->load("questions.xml"); //make sure path is correct 
+$xml->load("questions.xml");
 
 $factory = new question_set_factory;
 
 $question_set = $factory->create($xml);
 
-
 ////////////////////////////////////////////////////////
 
+// Needs an iterator to go over each question in the set.
 class question_set {
 	private $questions;
 	
@@ -36,7 +35,7 @@ class question_set {
 	}
 }
 
-
+// Make this a singleton
 class question_set_factory {
 	/**
 	 * @param[in] $xml   An XML object
@@ -54,10 +53,10 @@ class question_set_factory {
 				$vairable = NULL;
 				switch($type) {
 					case "text":
-						$variable = $this->create_text($xml_variable);
+						$variable = $this->create_text($xml_variable, $question->get_pre());
 						break;
 					case "radio":
-						$variable = $this->create_radio($xml_variable);
+						$variable = $this->create_radio($xml_variable, $question->get_pre());
 						break;
 					default:
 						assert("Unknown variable type '".$type."'");
@@ -75,19 +74,30 @@ class question_set_factory {
 		return $questions;
 	}
 	
-	private function create_text($variable) {
+	private function create_text($variable, $pre) {
 		$title = $variable->getElementsByTagName("title")->item(0)->nodeValue;
 		$instructions = $variable->getElementsByTagName("instructions")->item(0)->nodeValue;  // Note: this may be moved out of the XML
-		$name = $variable->getElemetnsByTagName("name")->item(0)->nodeValue;
-		$pre = ???
-		$default = $variable->getAttribute("default");
-		$ignore_quotes = 
+		$name = $variable->getElementsByTagName("name")->item(0)->nodeValue;
+		$default_value = $variable->getAttribute("default_value");
 		
-		return new text_input($title, $instructions, $name, $pre, $default, $ignore_quotes);
+		if($variable->getAttribute("ignore_quotes") == "true") {
+			$ignore_quotes = true;
+		} else {
+			$ignore_quotes = false;
+		}
+		
+		return new text_input($title, $instructions, $name, $pre, $default_value, $ignore_quotes);
 	}
 	
-	private function create_radio($variable) {
-		return new radio_selection_input($title, $instructions, $name, $pre, $default_value, $required, $values);
+	private function create_radio($variable, $pre) {
+		$title = $variable->getElementsByTagNAme("title")->item(0)->nodeValue;
+		$instructions = $variable->getElementsByTagName("instructions")->item(0)->nodeValue;
+		$name = $variable->getElementsByTagName("name")->item(0)->nodeValue;
+		$default_value = $variable->getAttribute("default_value");
+		
+		// need to get values
+		
+		return new radio_selection_input($title, $instructions, $name, $pre, $default_value, $values);
 	}
 }
 
