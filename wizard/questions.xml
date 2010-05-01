@@ -1,57 +1,102 @@
 <?xml version="1.0"?>
 <wizard>
-   <question qtype="number">
-   
-      <variable type="text" required="true" ignore_quotes="true">
-         <title>Answer</title>
-         <name>answer</name>
-      </variable>
+	<question qtype="number">
+		<variable type="text" required="true" ignore_quotes="true">
+			<title>Answer</title>
+			<name>answer</name>
+		</variable>
 
-      <variable type="text" default=".001" ignore_quotes="true">
-         <title>Relative Tolerance</title>
-         <name>reltolerance</name>
-      </variable>
+		<variable type="text" default_value=".001" ignore_quotes="true">
+			<title>Relative Tolerance</title>
+			<name>reltolerance</name>
+		</variable>
 
-      <variable type="text" ignore_quotes="true">
-         <title>Absolute Tolerance</title>
-         <name>abstolerance</name>
-      </variable>
+		<variable type="text" ignore_quotes="true">
+			<title>Absolute Tolerance</title>
+			<name>abstolerance</name>
+		</variable>
 
-      <variable type="text" ignore_quotes="true">
-         <title>Required Tolerance</title>
-         <name>reqdecimals</name>
-      </variable>
+		<variable type="text" ignore_quotes="true">
+			<title>Required Tolerance</title>
+			<name>reqdecimals</name>
+		</variable>
 
-      <variable type="radio">
-         <title>Answer Format</title>
-         <name>answerformat</name>
-         <selections default="default">
-            <selection name="default">Default</selection>
-            <selection name="list">List</selection>
-            <selection name="exactlist">Exact List</selection>
-            <selection name="orderedlist">Ordered List</selection>
-         </selections>
-      </variable>
+		<variable type="radio" default_value="default">
+			<title>Answer Format</title>
+			<name>answerformat</name>
+			<selection name="default">Default</selection>
+			<selection name="list">List</selection>
+			<selection name="exactlist">Exact List</selection>
+			<selection name="orderedlist">Ordered List</selection>
+		</variable>
 
-      <variable type="text">
-         <title>Answer Prompt</title>
-         <name>ansprompt</name>
-      </variable>
+		<variable type="text">
+			<title>Answer Prompt</title>
+			<name>ansprompt</name>
+		</variable>
 
-      <variable type="radio">
-         <title>Display Format</title>
-         <name>displayformat</name>
-         <selections default="number">
-            <selection name="number">Number</selection>
-            <selection name="point">Point</selection>
-            <selection name="vector">Vector</selection>
-         </selections>
-      </variable>
+		<variable type="radio" default_value="number">
+			<title>Display Format</title>
+			<name>displayformat</name>
+			<selection name="number">Number</selection>
+			<selection name="point">Point</selection>
+			<selection name="vector">Vector</selection>
+		</variable>
 
-      <variable type="text" default="20" ignore_quotes="true">
-         <title>Answer Box Size</title>
-         <name>answerboxsize</name>
-      </variable>
+		<variable type="text" default_value="20" ignore_quotes="true">
+			<title>Answer Box Size</title>
+			<name>answerboxsize</name>
+		</variable>
+	</question>
 
-   </question>
+	<question qtype="calculated">
+	</question>
+
+	<question qtype="choices">
+	</question>
+
+	<question qtype="multans">
+	</question>
+
+	<question qtype="matching">
+	</question>
+
+	<question qtype="numfunc">
+	</question>
+
+	<question qtype="string">
+	</question>
+
+	<question qtype="essay">
+	</question>
+
+	<question qtype="draw">
+	</question>
+
+	<question qtype="ntuple">
+	</question>
+
+	<question qtype="calcntuple">
+	</question>
+
+	<question qtype="matrix">
+	</question>
+
+	<question qtype="calcmatrix">
+	</question>
+
+	<question qtype="interval">
+	</question>
+
+	<question qtype="calcinterval">
+	</question>
+
+	<question qtype="complex">
+	</question>
+
+	<question qtype="calccomplex">
+	</question>
+
+	<question qtype="multipart">
+	</question>
 </wizard>

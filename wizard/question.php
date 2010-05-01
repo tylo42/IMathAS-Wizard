@@ -48,12 +48,12 @@ class Question {
 		$ret.=$this->head();
 		foreach($this->required_variables as $required_variable) {
 			$ret.=$required_variable->display_variable($this->myq,$this->line);
-      }
+		}
 
 		$ret.=$this->optional_variables_heading();
 		foreach($this->optional_variables as $optional_variable) {
 			$ret.=$optional_variable->display_variable($this->myq,$this->line);
-      }
+		}
 
 		$ret.=$this->foot();
 
@@ -104,9 +104,9 @@ class Question {
 
 			if(isset($variables[$var_name])) {
 				$variables[$var_name]->parse_variable($control_line,$this->line);
-         } else if($control_line!="") {
+			} else if($control_line!="") {
 				$variables['uvariables']->parse_variable($control_line,$this->line);
-         }
+			}
 		}
 		//print_r($this->line);
 	}

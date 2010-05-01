@@ -101,7 +101,7 @@ abstract class Variable {
 		if ($line[$name]==$value) {
 			$selected.="selected";
 		}
-      
+
 		if($value=="<disabled>") {
 			$disabled="disabled='disabled'";
 			$opt_value="";
